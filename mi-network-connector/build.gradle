@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.2.4'
+	id 'org.springframework.boot' version '2.7.18'
 	id 'io.spring.dependency-management' version '1.1.4'
 }
 
@@ -8,7 +8,7 @@ group = 'com.bns.clouddb'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '17'
+	sourceCompatibility = '1.8'
 }
 
 configurations {
@@ -22,7 +22,7 @@ repositories {
 }
 
 ext {
-	set('springShellVersion', "3.2.2")
+	set('springShellVersion', "2.1.15")
 }
 
 dependencies {
