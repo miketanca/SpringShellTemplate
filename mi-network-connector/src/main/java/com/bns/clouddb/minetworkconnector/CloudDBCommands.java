@@ -1,28 +1,31 @@
 package com.bns.clouddb.minetworkconnector;
 
+import com.bns.clouddb.minetworkconnector.model.ErrorResult;
+import com.bns.clouddb.minetworkconnector.model.SuccessResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.var;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.time.LocalDateTime;
 
 @ShellComponent
 public class CloudDBCommands {
     @Value("${fqdn}")
     private String fqdn;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @ShellMethod
+    @SneakyThrows
     public void connect(
             @ShellOption(defaultValue = "") String fqdn,
             @ShellOption(defaultValue = "1433") int port,
@@ -31,26 +34,54 @@ public class CloudDBCommands {
 
         val host = StringUtils.isBlank(fqdn) ? this.fqdn : fqdn;
 
-        System.out.println("Connecting to host " + host + ".");
+        InetAddress addr;
+        try {
+            addr = InetAddress.getByName(host);
+        } catch (Exception ex) {
+            val s = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(new ErrorResult(
+                    "SQL MI FQDN name " +
+                            host +
+                            " is not resolvable from the application. Check this link " +
+                            "<URL>" +
+                            " for troubleshooting"
+            ));
+            System.out.println(s);
+            return;
+        }
+
+        System.out.println("Connecting to " + host + ":" + port);
         try {
             var total = 0l;
             for (var i = 0; i < Math.max(1, count); i++) {
-                total += getLatency(host, port, timeout);
+                total += getLatency(addr, port, timeout);
             }
-            System.out.println("Host " + host + " is reachable in " + total / count + " milliseconds.");
+            val result = new SuccessResult(
+                    String.format("%dms", total / count), host, LocalDateTime.now().toString()
+            );
+            val s = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+            System.out.println(s);
         } catch (Exception e) {
-            System.out.println("Host " + host + " is not reachable.");
+            val s = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(new ErrorResult(
+                    "SQL MI " +
+                            host +
+                            " IP address is not accessible for the application via TCP:" +
+                            port +
+                            ". Check this " +
+                            "<URL>" +
+                            " for troubleshooting"
+            ));
+            System.out.println(s);
         }
     }
 
     @SneakyThrows
-    private long getLatency(String host, int port, int timeout) {
+    private long getLatency(InetAddress addr, int port, int timeout) {
         val startTime = System.currentTimeMillis();
 
-        val addr = new InetSocketAddress(host, port);
+        val socketAddr = new InetSocketAddress(addr, port);
 
         try (val socket = new Socket()) {
-            socket.connect(addr, timeout * 1000);
+            socket.connect(socketAddr, timeout * 1000);
         }
 
         return System.currentTimeMillis() - startTime;
