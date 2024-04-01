@@ -1,8 +1,12 @@
 package com.bns.clouddb.minetworkconnector;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.var;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -12,12 +16,20 @@ import java.net.Socket;
 
 @ShellComponent
 public class CloudDBCommands {
+    @Value("${fqdn}")
+    private String fqdn;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @ShellMethod
     public void connect(
-            String host,
+            @ShellOption(defaultValue = "") String fqdn,
             @ShellOption(defaultValue = "1433") int port,
             @ShellOption(defaultValue = "10") int count,
             @ShellOption(defaultValue = "5") int timeout) {
+
+        val host = StringUtils.isBlank(fqdn) ? this.fqdn : fqdn;
 
         System.out.println("Connecting to host " + host + ".");
         try {
