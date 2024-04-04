@@ -32,6 +32,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.17.0'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
+	implementation group: 'org.jline', name: 'jline', version: '3.25.1'
+	implementation group: 'org.jline', name: 'jline-native', version: '3.25.1'
+	implementation group: 'org.jline', name: 'jline-terminal-jna', version: '3.25.1'
 }
 
 dependencyManagement {
