@@ -7,6 +7,12 @@ plugins {
 group = 'com.bns.clouddb'
 version = '0.0.1-SNAPSHOT'
 
+try {
+	version = new File('/accp/version').text
+} catch (FileNotFoundException e) {
+	version = '1.1.0'
+}
+
 java {
 	sourceCompatibility = '1.8'
 }

@@ -10,8 +10,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetAddress;
@@ -30,17 +28,26 @@ public class CloudDBCommands {
             @ShellOption(defaultValue = "", help = "Fully qualified domain name of the SQL server managed instance")
             String fqdn,
             @ShellOption(defaultValue = "1433", help = "The TCP port of the SQL server managed instance, between 1 and 65535")
-            @Min(value = 1, message = "Port number should be greater or equal to 1")
-            @Max(value = 65535, message = "Port number should be less or equal to 65535")
             int port,
             @ShellOption(defaultValue = "10", help = "The count of connections to calculate average latency, between 1 and 20")
-            @Min(value = 1, message = "Count of connections should be greater or equal to 1")
-            @Max(value = 20, message = "Count of connections should be less or equal to 20")
             int count,
             @ShellOption(defaultValue = "5", help = "Timeout for connection to the SQL server managed instance, between 1 and 10 seconds")
-            @Min(value = 1, message = "Timeout should be greater or equal to 1 second")
-            @Max(value = 10, message = "Timeout should be less or equal to 10 seconds")
             int timeout) {
+
+        boolean valid = true;
+        if (port < 1 || port > 65535) {
+            System.out.println("Port nubmer should be between 1 and 65535");
+            valid = false;
+        }
+        if (count < 1 || count > 20) {
+            System.out.println("Count of connections should be between 1 and 20");
+            valid = false;
+        }
+        if (timeout < 1 || timeout > 10) {
+            System.out.println("Timeout should be between 1 and 10 seconds");
+            valid = false;
+        }
+        if (!valid) return;
 
 //        val path = Paths.get(".").toAbsolutePath().normalize().toString();
         val props = new Properties();
