@@ -5,7 +5,6 @@ import com.bns.clouddb.minetworkconnector.model.SuccessResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.var;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -45,8 +44,12 @@ public class CloudDBCommands {
 
 //        val path = Paths.get(".").toAbsolutePath().normalize().toString();
         val props = new Properties();
-        props.load(new FileInputStream(new File("minc.properties")));
-        val hostProp = props.getProperty("sqlmi.default.fqdn");
+        val file = new File("minc.properties");
+        String hostProp = null;
+        if (file.exists()) {
+            props.load(new FileInputStream(file));
+            hostProp = props.getProperty("sqlmi.default.fqdn");
+        }
 
         val host = StringUtils.isBlank(fqdn) ? hostProp : fqdn;
 
